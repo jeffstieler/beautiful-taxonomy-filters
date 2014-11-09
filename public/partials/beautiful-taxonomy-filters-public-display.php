@@ -11,7 +11,7 @@
  * @package    Beautiful_Taxonomy_Filters
  * @subpackage Beautiful_Taxonomy_Filters/public/partials
  */
- 
+
  /*
  * Filters in this file
  * @ beautiful_filters_post_types
@@ -28,7 +28,7 @@
  * @ beautiful_actions_after_form
  */
 ?>
-<?php 
+<?php
 $show_clear_all = apply_filters( 'beautiful_filters_clear_all', get_option('beautiful_taxonomy_filters_clear_all') );
 //Make sure we find the current post type! Put it as a hidden form input. This assures us that we'll know where to redirect inside the plugin at all times
 $current_post_type = get_post_type();
@@ -41,7 +41,7 @@ if(!$current_post_type || $current_post_type == 'page'){
 		//didnt find the post type in the template, fall back to the wp_query!
 		global $wp_query;
 		if($wp_query->query['post_type'] != ''){
-			$current_post_type = $wp_query->query['post_type'];	
+			$current_post_type = $wp_query->query['post_type'];
 		}
 	}
 }
@@ -52,9 +52,9 @@ if(!$current_post_type || $current_post_type == 'page'){
 		<input type="hidden" name="site-url" value="<?php echo get_bloginfo('url'); ?>" />
 		<input type="hidden" name="post_type" value="<?php echo $current_post_type; ?>" />
 		<?php do_action( 'beautiful_actions_beginning_form', $current_post_type); //allow custom markup at beginning of form ?>
-		<?php 
-		//Loop through the taxonomies and output their terms in a select dropdown 
-		$count = count($current_taxonomies);	
+		<?php
+		//Loop through the taxonomies and output their terms in a select dropdown
+		$count = count($current_taxonomies);
 		?>
 		<div class="beautiful-taxonomy-filters-select-wrap clearfix">
 			<?php foreach($current_taxonomies as $key => $taxonomy): ?>
@@ -64,7 +64,7 @@ if(!$current_post_type || $current_post_type == 'page'){
 						<label for="select-<?php echo $key; ?>" class="beautiful-taxonomy-filters-label"><?php echo apply_filters( 'beautiful_filters_taxonomy_label', $taxonomy->labels->name, $taxonomy->name); ?></label>
 						<?php
 						/**
-						* Output the dropdown with the terms of the taxonomy. 
+						* Output the dropdown with the terms of the taxonomy.
 						* Uses walker found in: public/class-beautiful-taxonomy-filters-walker.php
 						*/
 						$dropdown_args = array(
@@ -89,7 +89,7 @@ if(!$current_post_type || $current_post_type == 'page'){
 		</div>
 		<button type="submit" class="beautiful-taxonomy-filters-button"><?php _e('Apply filter', 'beautiful-taxonomy-filters'); ?></button>
 		<?php if($show_clear_all): ?>
-			<a href="<?php echo get_site_url() . '/' . $current_post_type; ?>" class="beautiful-taxonomy-filters-clear-all" title="<?php _e('Click to clear all active filters', 'beautiful-taxonomy-filters'); ?>"><?php _e('Clear all', 'beautiful-taxonomy-filters'); ?></a>
+			<a href="<?php echo get_site_url(), '/', beautiful_filters_get_post_type_slug( $current_post_type ); ?>" class="beautiful-taxonomy-filters-clear-all" title="<?php _e('Click to clear all active filters', 'beautiful-taxonomy-filters'); ?>"><?php _e('Clear all', 'beautiful-taxonomy-filters'); ?></a>
 		<?php endif; ?>
 		<?php do_action( 'beautiful_actions_ending_form', $current_post_type); //allow custom markup at beginning of form ?>
 	</form>
