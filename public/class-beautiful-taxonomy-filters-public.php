@@ -155,17 +155,21 @@ class Beautiful_Taxonomy_Filters_Public {
 
 		//Get the taxonomies of the current post type
 		$current_taxonomies = get_object_taxonomies($current_post_type, 'objects');
-		if($current_taxonomies){
-			foreach($current_taxonomies as $key => $value){
 
-				//check for each taxonomy as a $_POST variable.
-				//If it exists we want to append it along with the value (term) it has.
-				$term = (isset($_POST['select-'.$key]) ? $_POST['select-'.$key] : false);
-				if($term){
-					$new_url .= $key . '/' . $term . '/';
-				}
+		foreach ( $current_taxonomies as $tax_name => $tax_obj ) {
+
+			//check for each taxonomy as a $_POST variable.
+			//If it exists we want to append it along with the value (term) it has.
+			$term = isset( $_POST['select-' . $tax_name] ) ? $_POST['select-' . $tax_name] : false;
+
+			if ( $term ) {
+
+				$struct   = is_array( $tax_obj->rewrite ) ? $tax_obj->rewrite['slug'] : $tax_name;
+
+				$new_url .= $struct . '/' . $term . '/';
 
 			}
+
 		}
 
 		$new_url = $this->append_get_parameters($new_url);
