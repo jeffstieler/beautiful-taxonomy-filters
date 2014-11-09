@@ -150,20 +150,8 @@ class Beautiful_Taxonomy_Filters_Public {
 			}
 		}
 
-		$post_type_obj  = get_post_type_object( $current_post_type );
-
-		if ( get_option( 'permalink_structure' ) && is_array( $post_type_obj->rewrite ) ) {
-
-			$post_type_slug = ( true === $post_type_obj->has_archive ) ? $post_type_obj->rewrite['slug'] : $post_type_obj->has_archive;
-
-		} else {
-
-			$post_type_slug = $current_post_type;
-
-		}
-
 		//base url
-		$new_url = $referer . '/' . $post_type_slug . '/';
+		$new_url = $referer . '/' . self::get_post_type_slug( $current_post_type ) . '/';
 
 		//Get the taxonomies of the current post type
 		$current_taxonomies = get_object_taxonomies($current_post_type, 'objects');
@@ -253,6 +241,31 @@ class Beautiful_Taxonomy_Filters_Public {
 		if(!empty($wp_query->tax_query->queries)){
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/beautiful-taxonomy-filters-public-info-display.php';
 		}
+
+	}
+
+	/**
+	 * Public function to return a post type's slug
+	 *
+	 * @since 1.0.2
+	 * @param string $post_type
+	 * @return string
+	 */
+	public static function get_post_type_slug( $post_type ) {
+
+		$post_type_obj  = get_post_type_object( $post_type );
+
+		if ( get_option( 'permalink_structure' ) && is_array( $post_type_obj->rewrite ) ) {
+
+			$post_type_slug = ( true === $post_type_obj->has_archive ) ? $post_type_obj->rewrite['slug'] : $post_type_obj->has_archive;
+
+		} else {
+
+			$post_type_slug = $post_type;
+
+		}
+
+		return $post_type_slug;
 
 	}
 
