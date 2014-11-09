@@ -1,6 +1,6 @@
 <?php
 /**
- * The publicly accessible functions of the plugin. These communicate with our objects inside the classes. 
+ * The publicly accessible functions of the plugin. These communicate with our objects inside the classes.
  *
  * @link       http://tigerton.se
  * @since      1.0.0
@@ -29,6 +29,16 @@ function show_beautiful_filters_info(){
 	return Beautiful_Taxonomy_Filters_Public::beautiful_filters_info();
 }
 
+/**
+ * Template tag for retrieving a post type's rewrite slug
+ *
+ * @param string $post_type
+ * @return string
+ */
+function beautiful_filters_get_post_type_slug( $post_type ) {
 
+	return Beautiful_Taxonomy_Filters_Public::get_post_type_slug( $post_type );
+
+}
 
 ?>
