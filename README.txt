@@ -1,10 +1,10 @@
 === Beautiful taxonomy filters ===
-Contributors: Jonathandejong, tigerton
+Contributors: Jonathandejong, tigerton, jjmrestituto, jeffstieler
 Donate link: http://example.com/
 Tags: Taxonomy, filter, permalinks, terms
 Requires at least: 3.0.1
 Tested up to: 4.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,15 +15,15 @@ Supercharge your custom post type archives by letting visitors filter posts by t
 The Beautiful Taxonomy Filters plugin is an easy and good-looking way to provide your visitors with filtering for your post types. With this you get a complete solution for adding filtering based on taxonomy terms/categories/tags. It will also automatically add rewrite rules for pretty looking filter URLs. It’s completely automatic, works without javascript and is based on the [WordPress Plugin boilerplate](https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate) for a *standardized, organized and object-oriented* codebase. It uses [select2](http://ivaynberg.github.io/select2/) for pretty looking and user-friendly dropdowns but will fall back to ordinary ones if javascript is not supported.
 **No more horrible looking URLs or hacky Javascript solutions**
 
-= Features = 
+= Features =
 * Activate filtering on any registered public post type
 * Exclude taxonomies you just don’t want the visitors to filter on
 * Beautifies the resulting URLs. You won’t see any /posttype/?taxonomy1=term. Instead you’ll see /posttype/taxonomy/term
-* Comes with a complete functional filter component for you to put in your theme. 
+* Comes with a complete functional filter component for you to put in your theme.
 * Choose from different styles for the component, or disable styling and do it yourself in style.css! Just want to tweak a style? Add your custom CSS directly on the settings page
 * Want a ”Clear all” link for the filter component? Just tick a box in the settings page!
 * Ability to show your visitors information about their current active filtering
-* Allows for custom GET parameters to be included. Extend the filter your way with maybe a custom search-parameter or whatever you like. 
+* Allows for custom GET parameters to be included. Extend the filter your way with maybe a custom search-parameter or whatever you like.
 * Many filters and actions for modifying the plugins behavior. For those controlfreaks out there…
 
 
@@ -36,7 +36,7 @@ Do you want to translate this plugin to another language? I recommend using POEd
 
 = Other =
 * Based on [WordPress Plugin Boilerplate](https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate)
-* Uses [Select2](http://ivaynberg.github.io/select2/) to enhance dropdowns 
+* Uses [Select2](http://ivaynberg.github.io/select2/) to enhance dropdowns
 
 
 == Installation ==
@@ -54,7 +54,7 @@ Using this plugin, no. But the order is the same as the order in which you creat
 
 = Does this support multiple selecting multiple terms from the same taxonomy? =
 
-No. In a future release we will look into if it’s possible to support this AND having beautiful permalinks. If that doesn’t work we will likely add an option where you can opt out of beautiful permalinks and enjoy the power of multiple terms filtering instead. 
+No. In a future release we will look into if it’s possible to support this AND having beautiful permalinks. If that doesn’t work we will likely add an option where you can opt out of beautiful permalinks and enjoy the power of multiple terms filtering instead.
 
 = My taxonomy isn’t showing in the filter / the filters are too small =
 
@@ -72,6 +72,9 @@ Just start tagging up your posts and you’ll see it shows up! Also, make sure t
 
 
 == Changelog ==
+
+= 1.0.2 =
+* Use rewrite slugs for post types and taxonomies in filter URLs
 
 = 1.0.1 =
 * FIX: PHP Notice on some occasions using the filter info function
@@ -91,7 +94,7 @@ ____
 = beautiful_filters_dropdown_categories =
 
 $args is an array of the arguments put into the wp_dropdown_categories function.
-$taxonomy is the current taxonomy. 
+$taxonomy is the current taxonomy.
 
 `
 function modify_categories_dropdown( $args, $taxonomy ) {
@@ -127,7 +130,7 @@ add_filter( 'beautiful_filters_taxonomies', 'modify_categories_dropdown', 10, 1 
 
 = beautiful_filters_clear_all =
 
-$bool is a boolean which decides if the ”Clear all” link should be used or not. 
+$bool is a boolean which decides if the ”Clear all” link should be used or not.
 
 `
 function modify_clear_all( $bool ) {
@@ -143,7 +146,7 @@ $label is the name of the taxonomy used as label to the dropdown.
 
 `
 function modify_labels($label){
-	
+
 	return $label;
 }
 
@@ -157,7 +160,7 @@ $taxonomy is the current taxonomy name
 
 `
 function modify_active_taxonomy($label, $taxonomy){
-	
+
 	return $label;
 }
 
@@ -171,7 +174,7 @@ $taxonomy is the current taxonomy name
 
 `
 function modify_active_taxonomy($terms, $taxonomy){
-	
+
 	return $terms;
 }
 
@@ -187,7 +190,7 @@ $current_post_type is the post type which the filter component are currently usi
 
 `
 function add_markup_before_form($current_post_type){
-		
+
 	echo 'Hej världen';
 }
 
@@ -200,7 +203,7 @@ $current_post_type is the post type which the filter component are currently usi
 
 `
 function add_markup_after_form($current_post_type){
-	
+
 	echo 'Hej världen';
 }
 
@@ -214,7 +217,7 @@ This action is very usable if you for some reason need to add inputs to be send 
 
 `
 function add_markup_beginning_form($current_post_type){
-	
+
 	echo 'Hej världen';
 }
 
@@ -228,7 +231,7 @@ This action is very usable if you for some reason need to add inputs to be send 
 
 `
 function add_markup_ending_form($current_post_type){
-	
+
 	echo 'Hej världen';
 }
 

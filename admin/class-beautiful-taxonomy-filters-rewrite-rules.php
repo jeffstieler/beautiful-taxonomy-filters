@@ -29,7 +29,7 @@ class Beautiful_Taxonomy_Filters_Rewrite_Rules {
 	/**
 	 * Helper to add new rewrite rule and a paginated version
 	 *
-	 * @since 1.0.1
+	 * @since 1.0.2
 	 * @global object $wp_rewrite core's WP_Rewrite instance
 	 * @param array $rewrite_rules array of rewrite rules to add to
 	 * @param string $new_rewrite_rule the new rewrite pattern
@@ -134,7 +134,7 @@ class Beautiful_Taxonomy_Filters_Rewrite_Rules {
 	 *
 	 * i.e., [ a, b ] yields [ [ a ], [ a, b ], [ b ], [ b, a ] ]
 	 *
-	 * @since 1.0.1
+	 * @since 1.0.2
 	 * @param array $remaining
 	 * @param array $next
 	 * @param array $output
