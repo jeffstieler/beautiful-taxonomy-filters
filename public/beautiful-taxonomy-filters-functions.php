@@ -29,16 +29,4 @@ function show_beautiful_filters_info(){
 	return Beautiful_Taxonomy_Filters_Public::beautiful_filters_info();
 }
 
-/**
- * Template tag for retrieving a post type's rewrite slug
- *
- * @param string $post_type
- * @return string
- */
-function beautiful_filters_get_post_type_slug( $post_type ) {
-
-	return Beautiful_Taxonomy_Filters_Public::get_post_type_slug( $post_type );
-
-}
-
 ?>

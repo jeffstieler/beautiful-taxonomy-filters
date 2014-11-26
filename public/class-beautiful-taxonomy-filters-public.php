@@ -118,6 +118,50 @@ class Beautiful_Taxonomy_Filters_Public {
 
 
 	/**
+	* Retrieves the current post type
+	*
+	* @since 1.1.0
+	*/
+	public static function get_current_posttype($rewrite = true){
+		$current_post_type = get_post_type();
+		if(!$current_post_type || $current_post_type == 'page'){
+			global $template;
+			$template_name = explode('-', basename( $template, '.php' ));
+			if (in_array('archive', $template_name) && count($template_name) > 1) {
+				$current_post_type = $template_name[1];
+			}else{
+				//didnt find the post type in the template, fall back to the wp_query!
+				global $wp_query;
+				if(array_key_exists('post_type', $wp_query->query) && $wp_query->query['post_type'] != ''){
+					$current_post_type = $wp_query->query['post_type'];
+				}
+			}
+		}
+		if($rewrite){
+			//Get the post type object
+			$post_type_object = get_post_type_object($current_post_type);
+
+			if ( get_option( 'permalink_structure' ) && is_array( $post_type_object->rewrite ) ) {
+
+				$post_type_slug = ( true === $post_type_object->has_archive ) ? $post_type_object->rewrite['slug'] : $post_type_object->has_archive;
+
+			} else {
+
+				$post_type_slug = $post_type;
+
+			}
+
+			return $post_type_slug;
+
+
+		}else{
+			return $current_post_type;
+		}
+
+	}
+
+
+	/**
 	* Runs on template_include filter. Check for $POST values coming from the filter and add them to the url
 	* Also check for custom GET parameters and reattach them to the url to support combination with other functionalities
 	* @since 1.0.0
@@ -129,29 +173,21 @@ class Beautiful_Taxonomy_Filters_Public {
 			return;
 
 		//get current post type archive
+		if(isset($_POST['post_type_rewrite']) && $_POST['post_type_rewrite'] != ''){
+			$current_post_type_rewrite = $_POST['post_type_rewrite'];
+		}else{ //If there was no post type from the form (for some reason), try to get it anyway!
+			$current_post_type_rewrite = self::get_current_posttype();
+		}
+
+		//get current post type archive
 		if(isset($_POST['post_type']) && $_POST['post_type'] != ''){
 			$current_post_type = $_POST['post_type'];
 		}else{ //If there was no post type from the form (for some reason), try to get it anyway!
-			$current_post_type = get_post_type();
-			//If there is no post type found OR post type found is a page, try to find the post type from the current template instead!
-			if(!$current_post_type || $current_post_type == 'page'){
-				global $template;
-				$template_name = explode('-', basename( $template, '.php' ));
-				if (in_array('archive', $template_name) && count($template_name) > 1) {
-					//We found the post type in the template!
-					$current_post_type = $template_name[1];
-				}else{
-					//didnt find the post type in the template, fall back to the wp_query!
-					global $wp_query;
-					if($wp_query->query['post_type'] != ''){
-						$current_post_type = $wp_query->query['post_type'];
-					}
-				}
-			}
+			$current_post_type = self::get_current_posttype(false);
 		}
 
 		//base url
-		$new_url = $referer . '/' . self::get_post_type_slug( $current_post_type ) . '/';
+		$new_url = $referer . '/' . $current_post_type_rewrite . '/';
 
 		//Get the taxonomies of the current post type
 		$current_taxonomies = get_object_taxonomies($current_post_type, 'objects');
@@ -181,6 +217,38 @@ class Beautiful_Taxonomy_Filters_Public {
 
 
 	/**
+	* Attempts to automagically insert the filter on the correct archives by using the loop_start hook
+	*
+	* @since 1.1.1
+	*/
+	public function automagic_insertion($query){
+
+		$post_types = get_option('beautiful_taxonomy_filters_post_types');
+
+		//first make sure we're on a main query and an archive page for one of our selected posttypes
+		if ($query->is_main_query() && is_post_type_archive($post_types)) {
+
+			$automagic = get_option('beautiful_taxonomy_filters_automagic');
+
+			if(in_array('filter_info_module', $automagic) && in_array('above', $automagic)){
+				self::beautiful_filters_info();
+			}
+
+			if(in_array('filter_module', $automagic)){
+				self::beautiful_filters();
+			}
+
+			if(in_array('filter_info_module', $automagic) && in_array('below', $automagic)){
+				self::beautiful_filters_info();
+			}
+
+		}
+
+
+	}
+
+
+	/**
 	* Public function to return the filters for the current post type archive.
 	*
 	* @since 1.0.0
@@ -199,21 +267,12 @@ class Beautiful_Taxonomy_Filters_Public {
 		if(isset($_POST['post_type']) && $_POST['post_type'] != ''){
 			$current_post_type = $_POST['post_type'];
 		}else{ //If there was no post type from the form (for some reason), try to get it anyway!
-			$current_post_type = get_post_type();
-			//If there is no post type found OR post type found is a page, try to find the post type from the current template instead!
-			if(!$current_post_type || $current_post_type == 'page'){
-				global $template;
-				$template_name = explode('-', basename( $template, '.php' ));
-				if (in_array('archive', $template_name) && count($template_name) > 1) {
-					$current_post_type = $template_name[1];
-				}else{
-					global $wp_query;
-					if($wp_query->query['post_type'] != ''){
-						$current_post_type = $wp_query->query['post_type'];
-					}
-				}
-			}
+			$current_post_type = self::get_current_posttype(false);
 		}
+
+		//not a post type we have the filter on, bail early!
+		if(!in_array($current_post_type, $post_types))
+			return;
 
 		//Get the taxonomies of the current post type
 		$current_taxonomies = get_object_taxonomies($current_post_type, 'objects');
@@ -245,31 +304,6 @@ class Beautiful_Taxonomy_Filters_Public {
 		if(!empty($wp_query->tax_query->queries)){
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/beautiful-taxonomy-filters-public-info-display.php';
 		}
-
-	}
-
-	/**
-	 * Public function to return a post type's slug
-	 *
-	 * @since 1.0.2
-	 * @param string $post_type
-	 * @return string
-	 */
-	public static function get_post_type_slug( $post_type ) {
-
-		$post_type_obj  = get_post_type_object( $post_type );
-
-		if ( get_option( 'permalink_structure' ) && is_array( $post_type_obj->rewrite ) ) {
-
-			$post_type_slug = ( true === $post_type_obj->has_archive ) ? $post_type_obj->rewrite['slug'] : $post_type_obj->has_archive;
-
-		} else {
-
-			$post_type_slug = $post_type;
-
-		}
-
-		return $post_type_slug;
 
 	}
 

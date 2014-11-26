@@ -44,15 +44,15 @@ class Beautiful_Taxonomy_Filters_Admin {
 		$this->version = $version;
 
 	}
-	
-	
+
+
 	/**
 	 * Initiates our custom rewrite class
 	 *
 	 * @since    1.0.0
 	 */
  	public function add_rewrite_rules(){
- 	
+
 	 	global $wp_rewrite;
 	 	//get the saved options
 	 	$post_types = get_option('beautiful_taxonomy_filters_post_types');
@@ -66,10 +66,23 @@ class Beautiful_Taxonomy_Filters_Admin {
 				$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 			}
 		}
-				
+
  	}
- 	
-	
+
+
+ 	/**
+	 * Create our custom filter widget
+	 *
+	 * @since    1.0.0
+	 */
+	public function register_widgets() {
+
+	    register_widget( 'Beautiful_Taxonomy_Filters_Widget' );
+	    register_widget( 'Beautiful_Taxonomy_Filters_Info_Widget' );
+
+	}
+
+
 	/**
 	 * Register the settings page
 	 *
@@ -78,25 +91,29 @@ class Beautiful_Taxonomy_Filters_Admin {
 	public function add_admin_menu() {
 	    add_options_page( 'Beautiful Taxonomy Filters', 'Taxonomy Filters', 'manage_options', 'taxonomy-filters', array($this, 'create_admin_interface'));
 	}
-	
+
 	/**
 	 * Callback function for the admin settings page.
 	 *
 	 * @since    1.0.0
 	 */
-	public function create_admin_interface(){	
-		
+	public function create_admin_interface(){
+
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-admin-display.php';
-		
+
 	}
-	
+
 	/**
-	 * Creates our settings sections with fields etc. 
+	 * Creates our settings sections with fields etc.
 	 *
 	 * @since    1.0.0
 	 */
 	public function settings_api_init(){
-		
+
+		/*
+		* SECTIONS
+		*/
+
 		// Add the Setup settings section to our plugins settings page
 	 	add_settings_section(
 			'taxonomy_filters_general_settings_section',
@@ -104,7 +121,15 @@ class Beautiful_Taxonomy_Filters_Admin {
 			array($this, 'setting_section_callback_function'),
 			'taxonomy-filters'
 		);
-		
+
+		// Add the Filter module settings section to our plugins settings page
+	 	add_settings_section(
+			'taxonomy_filters_module_settings_section',
+			__('Filter module settings', 'beautiful-taxonomy-filters'),
+			array($this, 'filters_module_setting_section_callback_function'),
+			'taxonomy-filters'
+		);
+
 		// Add the Style Settings section to our plugins settings page
 	 	add_settings_section(
 			'taxonomy_filters_styling_settings_section',
@@ -112,7 +137,12 @@ class Beautiful_Taxonomy_Filters_Admin {
 			array($this, 'style_setting_section_callback_function'),
 			'taxonomy-filters'
 		);
-				
+
+
+		/*
+		* SETTINGS FIELDS
+		*/
+
 		// Add the field with the post types
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_post_types',
@@ -121,7 +151,7 @@ class Beautiful_Taxonomy_Filters_Admin {
 			'taxonomy-filters',
 			'taxonomy_filters_general_settings_section'
 		);
-		
+
 		// Add the field with the taxonomies
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_taxonomies',
@@ -130,16 +160,52 @@ class Beautiful_Taxonomy_Filters_Admin {
 			'taxonomy-filters',
 			'taxonomy_filters_general_settings_section'
 		);
-		
+
 		// Add checkbox to let users choose to display a "clear all" link on filter
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_clear_all',
 			__('Enable a "Clear all" link:', 'beautiful-taxonomy-filters'),
 			array($this, 'clear_all_setting_callback_function'),
 			'taxonomy-filters',
-			'taxonomy_filters_styling_settings_section'
+			'taxonomy_filters_module_settings_section'
 		);
-		
+
+		// Hide empty terms/categories from the dropdowns
+	 	add_settings_field(
+			'beautiful_taxonomy_filters_hide_empty',
+			__('Hide empty terms in the dropdowns:', 'beautiful-taxonomy-filters'),
+			array($this, 'hide_empty_setting_callback_function'),
+			'taxonomy-filters',
+			'taxonomy_filters_module_settings_section'
+		);
+
+		// Show count next to term
+	 	add_settings_field(
+			'beautiful_taxonomy_filters_show_count',
+			__('Show post count next to term name:', 'beautiful-taxonomy-filters'),
+			array($this, 'show_count_setting_callback_function'),
+			'taxonomy-filters',
+			'taxonomy_filters_module_settings_section'
+		);
+
+		// Select either an "All terms" option or a placeholder with a deselect
+	 	add_settings_field(
+			'beautiful_taxonomy_filters_dropdown_behaviour',
+			__('Dropdown deselect/default behaviour:', 'beautiful-taxonomy-filters'),
+			array($this, 'dropdown_behaviour_setting_callback_function'),
+			'taxonomy-filters',
+			'taxonomy_filters_module_settings_section'
+		);
+
+		// Automagically insert the modules using loop_start hook
+	 	add_settings_field(
+			'beautiful_taxonomy_filters_automagic',
+			__('Automagically insert the modules in the archives:', 'beautiful-taxonomy-filters'),
+			array($this, 'automagic_setting_callback_function'),
+			'taxonomy-filters',
+			'taxonomy_filters_module_settings_section'
+		);
+
 		// Add checkbox to let users choose to disable the "active filters" heading
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_disable_heading',
@@ -148,7 +214,7 @@ class Beautiful_Taxonomy_Filters_Admin {
 			'taxonomy-filters',
 			'taxonomy_filters_styling_settings_section'
 		);
-		
+
 		// Add the field with the selectable styles
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_styles',
@@ -157,7 +223,7 @@ class Beautiful_Taxonomy_Filters_Admin {
 			'taxonomy-filters',
 			'taxonomy_filters_styling_settings_section'
 		);
-		
+
 		// Add the textarea where the user can put custom CSS
 	 	add_settings_field(
 			'beautiful_taxonomy_filters_custom_css',
@@ -166,45 +232,73 @@ class Beautiful_Taxonomy_Filters_Admin {
 			'taxonomy-filters',
 			'taxonomy_filters_styling_settings_section'
 		);
-		
+
 		// Add a new setting to the options table
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_post_types' );
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_taxonomies' );
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_styles' );
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_custom_css' );
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_clear_all' );
+		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_show_count' );
+		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_hide_empty' );
 		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_disable_heading' );
-		
+		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_dropdown_behaviour' );
+		register_setting( 'taxonomy-filters', 'beautiful_taxonomy_filters_automagic' );
+
+
 	}
-	
+
 	//Our callback functions
+
+	/* SECTIONS */
 	function setting_section_callback_function(){
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-section-display.php';
 	}
 	function style_setting_section_callback_function(){
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-style-section-display.php';
 	}
-	
+
+	function filters_module_setting_section_callback_function(){
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-module-section-display.php';
+	}
+
+	/* SETTINGS FIELDS */
 	function post_type_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-post_type-settings-display.php';
  	}
- 	
+
  	function taxonomies_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-taxonomies-settings-display.php';
  	}
- 	
+
  	function clear_all_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-clear-all-settings-display.php';
  	}
- 	
+
+ 	function hide_empty_setting_callback_function() {
+ 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-hide-empty-settings-display.php';
+ 	}
+
+ 	function show_count_setting_callback_function() {
+ 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-show-count-settings-display.php';
+ 	}
+
+ 	function dropdown_behaviour_setting_callback_function() {
+ 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-dropdown-behaviour-settings-display.php';
+ 	}
+
+ 	function automagic_setting_callback_function() {
+ 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-automagic-settings-display.php';
+ 	}
+
  	function disable_heading_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-disable-heading-settings-display.php';
  	}
- 	
+
  	function styles_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-styles-settings-display.php';
  	}
- 	
+
  	function custom_css_setting_callback_function() {
  		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/beautiful-taxonomy-filters-custom-css-settings-display.php';
  	}
