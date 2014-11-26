@@ -228,7 +228,7 @@ class Beautiful_Taxonomy_Filters_Public {
 		//first make sure we're on a main query and an archive page for one of our selected posttypes
 		if ($query->is_main_query() && is_post_type_archive($post_types)) {
 
-			$automagic = get_option('beautiful_taxonomy_filters_automagic');
+			$automagic = get_option('beautiful_taxonomy_filters_automagic', array());
 
 			if(in_array('filter_info_module', $automagic) && in_array('above', $automagic)){
 				self::beautiful_filters_info();
